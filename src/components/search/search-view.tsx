@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookCard } from "@/components/book-card";
 import { SearchIcon } from "@/components/icons";
+import { BookListSkeleton } from "@/components/skeletons";
 import type { BookSummary } from "@/lib/book-summary";
 
 const DEBOUNCE_MS = 150;
@@ -68,14 +69,9 @@ export function SearchView() {
             Search by title, author, narrator or category.
           </p>
         ) : current === null ? (
-          <ul className="mt-6 flex flex-col gap-4" aria-hidden="true">
-            {[0, 1, 2].map((key) => (
-              <li
-                key={key}
-                className="h-30 animate-pulse rounded-2xl border border-border bg-surface"
-              />
-            ))}
-          </ul>
+          <div className="mt-6">
+            <BookListSkeleton count={3} />
+          </div>
         ) : current.books.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-border bg-surface p-6 text-center">
             <p className="font-serif text-lg">Nothing found</p>

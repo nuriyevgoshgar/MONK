@@ -28,19 +28,13 @@
   --font-serif: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
 }
 
-/* Light theme. Dark stays the default; this applies when the listener picks
-   Light, or when they leave the choice on System and the system asks for it. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --background: #faf7f2;
-    --surface: #ffffff;
-    --surface-raised: #f1ece4;
-    --border: #e3dbd1;
-    --foreground: #1a1714;
-    --muted: #6e655c;
-    --accent: #a2621f;
-    --accent-soft: #f6e8d8;
-  }
+/* Light theme. Dark above is the default and needs no attribute, so the very
+   first paint is dark even before the theme choice is read from storage.
+   Light applies only when it is asked for: explicitly, or via System on a
+   light desktop. */
+:root[data-theme="light"],
+:root[data-theme="system"] {
+  color-scheme: light;
 }
 
 :root[data-theme="light"] {
@@ -52,6 +46,25 @@
   --muted: #6e655c;
   --accent: #a2621f;
   --accent-soft: #f6e8d8;
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --background: #faf7f2;
+    --surface: #ffffff;
+    --surface-raised: #f1ece4;
+    --border: #e3dbd1;
+    --foreground: #1a1714;
+    --muted: #6e655c;
+    --accent: #a2621f;
+    --accent-soft: #f6e8d8;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    color-scheme: dark;
+  }
 }
 
 body {

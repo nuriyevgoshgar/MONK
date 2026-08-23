@@ -15,6 +15,7 @@ import {
   type SleepTimer,
 } from "./player-context";
 import { useAudioEvents } from "./use-audio-events";
+import { useChapterSource } from "./use-chapter-source";
 import { useMediaSession } from "./use-media-session";
 import { useProgressSync, type ProgressSnapshot } from "./use-progress-sync";
 import { useRestoreProgress } from "./use-restore-progress";
@@ -81,27 +82,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const saveProgress = useProgressSync(getSnapshot, isPlaying);
 
-  // Point the element at the current chapter. Guarded by the loaded id so an
-  // unrelated re-render cannot restart playback.
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !chapter) return;
-    if (loadedChapterRef.current === chapter.id) return;
-
-    loadedChapterRef.current = chapter.id;
-    audio.src = chapter.audioUrl;
-    audio.load();
-    setError(null);
-
-    if (shouldPlayRef.current) {
-      shouldPlayRef.current = false;
-      void audio.play().catch(() => setIsPlaying(false));
-    }
-  }, [chapter]);
-
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.playbackRate = speed;
-  }, [speed, chapter]);
+  useChapterSource(
+    audioRef,
+    loadedChapterRef,
+    shouldPlayRef,
+    chapter,
+    speed,
+    () => setError(null),
+    () => setIsPlaying(false),
+  );
 
   // What happens when a chapter runs out: stop for the sleep timer, mark the
   // book finished on the last chapter, otherwise roll straight into the next.

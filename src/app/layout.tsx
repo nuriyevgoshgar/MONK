@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import { BottomNav } from "@/components/bottom-nav";
+import { OfflineBanner } from "@/components/offline-banner";
 import { FullPlayer } from "@/components/player/full-player";
 import { MiniPlayer } from "@/components/player/mini-player";
 import { PlayerProvider } from "@/components/player/player-provider";
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeApplier />
         <ServiceWorkerRegistrar />
         <PlayerProvider>
+          <OfflineBanner />
           {children}
           <MiniPlayer />
           <BottomNav />

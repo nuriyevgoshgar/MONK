@@ -10,17 +10,17 @@ Vercel.
 
 ## Status
 
-Build steps 1-2 of 6 are done: setup and schema, a seeded catalogue of 5
-hand-written books, and a working global player. Nothing is crawled yet.
+Steps 1, 2, 4, 5 and 6 are done. Step 3 (ingestion) is blocked — see below.
+Nothing has been crawled; the catalogue is 5 hand-written books.
 
 | Step | | |
 | --- | --- | --- |
 | 1 | Setup, schema, 5-book seed | done |
 | 2 | Book list, book page, global player with position saving | done |
 | 3 | Ingestion script, full catalogue | blocked — see below |
-| 4 | Search, library, shelves, bookmarks | next |
-| 5 | PWA, offline downloads | |
-| 6 | Polish, empty/error states, skeletons | |
+| 4 | Search, library, shelves, bookmarks | done |
+| 5 | PWA, offline downloads | done |
+| 6 | Polish, empty/error states, skeletons | done |
 
 ### The player
 
@@ -39,8 +39,49 @@ Chapters auto-advance; the last one stops and marks the book finished. Speed
 15s / forward 30s, a chapter picker and the Media Session API (lock screen and
 headphone controls) are all wired up.
 
-Not yet built, by design: the Save/shelf button and bookmarks (step 4) and the
-download button (step 5).
+### Search, shelves and bookmarks
+
+Search is debounced at 150ms and covers title, author, narrator and category.
+SQLite's `LIKE` is already case-insensitive for ASCII, which is why there is no
+`mode: "insensitive"` (Prisma does not support it on SQLite).
+
+Shelves fill themselves: pressing play files a book under Listening, finishing
+it moves it to Finished, and Save keeps one for later. Progress and shelf are
+written in a single transaction.
+
+Bookmarks are dropped from the player at the current position, and jump back to
+the right chapter and second.
+
+### Offline
+
+Downloading a book fetches every chapter into a Cache Storage bucket that the
+service worker serves from, and records the book in IndexedDB. Cancelling stops
+the fetch and drops what already landed; chapters are only cached once they
+arrive whole, so a cancelled download never leaves a truncated file.
+
+The worker answers Range requests with a sliced `206`, so seeking works offline
+instead of failing against a whole-file `200`. The audio cache is deliberately
+unversioned — bumping the worker must never throw away a listener's downloads.
+
+The Library reads downloaded books from IndexedDB and plays them from stored
+metadata, so that screen works with no connection at all.
+
+### A known trade-off: soft 404s
+
+A book slug that does not exist renders the not-found screen but returns HTTP
+`200`, not `404`. In Next 16 a dynamic route streams a static shell before the
+data check runs, and the status cannot change once streaming has started; Next
+injects `<meta name="robots" content="noindex">` so the page stays out of
+search results. Returning a hard `404` would mean checking the slug before the
+response streams — in `proxy`, which cannot reach the database here. Documented
+in `node_modules/next/dist/docs/01-app/03-api-reference/04-functions/not-found.md`.
+
+### On shadcn/ui
+
+The brief called for shadcn/ui, but its registry (`ui.shadcn.com`) is
+unreachable from this environment, so the handful of primitives needed — the
+scrubber, tabs, sheets, icons — are hand-built with Tailwind instead. No icon
+or component dependency was added.
 
 ### A note on local development
 
@@ -101,6 +142,7 @@ npm run sample:audio
 | `npm run db:reset` | Drop everything and re-seed |
 | `npm run db:studio` | Browse the database in Prisma Studio |
 | `npm run covers` | Redraw placeholder cover art |
+| `npm run icons` | Redraw the PWA icons |
 | `npm run sample:audio` | Render placeholder narration |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 

@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { formatDuration } from "@/lib/format";
 import type { PlayerBook } from "@/lib/player/types";
 
+// Read per request: the catalogue changes without a rebuild.
 export const dynamic = "force-dynamic";
 
 export default async function BookPage({ params }: PageProps<"/book/[slug]">) {

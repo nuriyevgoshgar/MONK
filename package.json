@@ -13,9 +13,10 @@
     "db:seed": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON prisma/seed.mts",
     "db:reset": "prisma db push --force-reset && npm run db:seed",
     "sample:audio": "node scripts/make-sample-audio.mjs",
-    "setup": "prisma generate && prisma db push && npm run covers && npm run sample:audio && npm run db:seed",
+    "setup": "prisma generate && prisma db push && npm run covers && npm run icons && npm run sample:audio && npm run db:seed",
     "postinstall": "prisma generate",
-    "covers": "node scripts/make-covers.mjs"
+    "covers": "node scripts/make-covers.mjs",
+    "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",

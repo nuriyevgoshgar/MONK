@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookCard } from "@/components/book-card";
 import { DownloadedBooks } from "@/components/library/downloaded-books";
+import { BookListSkeleton } from "@/components/skeletons";
 import type { BookSummary } from "@/lib/book-summary";
 import { SHELF_LABELS, SHELF_STATUSES, type ShelfStatus } from "@/lib/shelf";
 import { useDeviceId } from "@/lib/use-device-id";
@@ -61,14 +62,9 @@ export function LibraryView() {
       </div>
 
       {entries === null ? (
-        <ul className="mt-4 flex flex-col gap-4" aria-hidden="true">
-          {[0, 1, 2].map((key) => (
-            <li
-              key={key}
-              className="h-30 animate-pulse rounded-2xl border border-border bg-surface"
-            />
-          ))}
-        </ul>
+        <div className="mt-4">
+          <BookListSkeleton count={3} />
+        </div>
       ) : visible.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-border bg-surface p-6 text-center">
           <p className="font-serif text-lg">{SHELF_LABELS[tab]}</p>

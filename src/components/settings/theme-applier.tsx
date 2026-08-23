@@ -9,10 +9,9 @@ export function ThemeApplier() {
   const { theme } = useSettings();
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (theme === "system") delete root.dataset.theme;
-    else root.dataset.theme = theme;
+    // Always stamped, "system" included: with no attribute the CSS falls back
+    // to dark, which is what an unconfigured install should look like.
+    document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   return null;

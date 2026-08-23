@@ -165,7 +165,7 @@ export function FullPlayer() {
             <OptionButton
               active={activePanel === "speed"}
               onClick={() => togglePanel("speed")}
-              label={`${speed}×`}
+              label="Speed"
             >
               <span className="text-sm tabular-nums">{speed}×</span>
             </OptionButton>

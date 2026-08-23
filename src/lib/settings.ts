@@ -11,7 +11,9 @@ export type Settings = {
 
 const STORAGE_KEY = "monk.settings";
 
-const DEFAULTS: Settings = { theme: "system", defaultSpeed: 1 };
+// Dark first, as the design calls for. Light is opt-in, and "system"
+// hands the choice to the operating system.
+const DEFAULTS: Settings = { theme: "dark", defaultSpeed: 1 };
 
 const listeners = new Set<() => void>();
 
