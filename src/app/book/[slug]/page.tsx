@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { BookActions } from "@/components/book/book-actions";
 import { BookChapterList } from "@/components/book/book-chapter-list";
+import { DownloadButton } from "@/components/book/download-button";
 import { SaveButton } from "@/components/book/save-button";
+import type { BookSummary } from "@/lib/book-summary";
 import { db } from "@/lib/db";
 import { formatDuration } from "@/lib/format";
 import type { PlayerBook } from "@/lib/player/types";
@@ -36,6 +38,18 @@ export default async function BookPage({ params }: PageProps<"/book/[slug]">) {
     })),
   };
 
+  const summary: BookSummary = {
+    id: book.id,
+    slug: book.slug,
+    title: book.title,
+    author: book.author,
+    narrator: book.narrator,
+    coverUrl: book.coverUrl,
+    category: book.category,
+    totalDuration: book.totalDuration,
+    chapterCount: book.chapters.length,
+  };
+
   return (
     <AppShell back>
       <Image
@@ -59,6 +73,7 @@ export default async function BookPage({ params }: PageProps<"/book/[slug]">) {
 
       <BookActions book={playerBook} />
       <SaveButton bookId={book.id} />
+      <DownloadButton book={playerBook} summary={summary} />
 
       <p className="mt-8 text-sm leading-relaxed text-muted">
         {book.description}

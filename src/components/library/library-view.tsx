@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BookCard } from "@/components/book-card";
+import { DownloadedBooks } from "@/components/library/downloaded-books";
 import type { BookSummary } from "@/lib/book-summary";
 import { SHELF_LABELS, SHELF_STATUSES, type ShelfStatus } from "@/lib/shelf";
 import { useDeviceId } from "@/lib/use-device-id";
@@ -84,6 +85,8 @@ export function LibraryView() {
           ))}
         </ul>
       )}
+
+      <DownloadedBooks />
     </div>
   );
 }

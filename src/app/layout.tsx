@@ -4,6 +4,8 @@ import { BottomNav } from "@/components/bottom-nav";
 import { FullPlayer } from "@/components/player/full-player";
 import { MiniPlayer } from "@/components/player/mini-player";
 import { PlayerProvider } from "@/components/player/player-provider";
+import { ServiceWorkerRegistrar } from "@/components/service-worker";
+import { ThemeApplier } from "@/components/settings/theme-applier";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,6 +23,8 @@ export const metadata: Metadata = {
   title: "MONK",
   description: "A quiet place to listen to books.",
   applicationName: "MONK",
+  appleWebApp: { capable: true, title: "MONK", statusBarStyle: "black-translucent" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
@@ -38,6 +42,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="font-sans min-h-full flex flex-col">
         {/* The player lives in the layout, above the routed content, so
             navigating between screens never unmounts the <audio> element. */}
+        <ThemeApplier />
+        <ServiceWorkerRegistrar />
         <PlayerProvider>
           {children}
           <MiniPlayer />

@@ -1,10 +1,11 @@
-import { TabPlaceholder } from "@/components/tab-placeholder";
+import { AppShell } from "@/components/app-shell";
+import { SettingsView } from "@/components/settings/settings-view";
 
 export default function SettingsPage() {
   return (
-    <TabPlaceholder
-      title="Settings"
-      note="Theme, default speed, downloads and storage usage arrive with steps 5 and 6."
-    />
+    <AppShell>
+      <h1 className="font-serif text-2xl">Settings</h1>
+      <SettingsView />
+    </AppShell>
   );
 }

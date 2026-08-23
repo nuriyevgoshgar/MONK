@@ -28,6 +28,32 @@
   --font-serif: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
 }
 
+/* Light theme. Dark stays the default; this applies when the listener picks
+   Light, or when they leave the choice on System and the system asks for it. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --background: #faf7f2;
+    --surface: #ffffff;
+    --surface-raised: #f1ece4;
+    --border: #e3dbd1;
+    --foreground: #1a1714;
+    --muted: #6e655c;
+    --accent: #a2621f;
+    --accent-soft: #f6e8d8;
+  }
+}
+
+:root[data-theme="light"] {
+  --background: #faf7f2;
+  --surface: #ffffff;
+  --surface-raised: #f1ece4;
+  --border: #e3dbd1;
+  --foreground: #1a1714;
+  --muted: #6e655c;
+  --accent: #a2621f;
+  --accent-soft: #f6e8d8;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import type { PlayerBook } from "@/lib/player/types";
+import { useSettings } from "@/lib/settings";
 import {
   PlayerActionsContext,
   PlayerStatusContext,
@@ -33,7 +34,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [speed, setSpeed] = useState(1);
+  // The default from Settings applies until the listener changes speed for
+  // whatever is playing; starting a different book falls back to the default.
+  const { defaultSpeed } = useSettings();
+  const [speedOverride, setSpeed] = useState<number | null>(null);
+  const speed = speedOverride ?? defaultSpeed;
   const [sleep, setSleepTimer] = useState<SleepTimer>({ kind: "off" });
   const [expanded, setExpanded] = useState(false);
   const [time, setTime] = useState<PlayerTime>({ position: 0, duration: 0 });
@@ -211,6 +216,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
       // Switching away — write down where the previous book was left.
       saveProgress();
+
+      if (track?.book.id !== book.id) setSpeed(null);
 
       pendingSeekRef.current = positionSec;
       positionRef.current = positionSec;
