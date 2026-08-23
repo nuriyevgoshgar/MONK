@@ -10,17 +10,42 @@ Vercel.
 
 ## Status
 
-Build step 1 of 6 is done: project setup, database schema, and a seeded
-development catalogue of 5 hand-written books. Nothing is crawled yet.
+Build steps 1-2 of 6 are done: setup and schema, a seeded catalogue of 5
+hand-written books, and a working global player. Nothing is crawled yet.
 
 | Step | | |
 | --- | --- | --- |
 | 1 | Setup, schema, 5-book seed | done |
-| 2 | Book list, book page, global player with position saving | next |
+| 2 | Book list, book page, global player with position saving | done |
 | 3 | Ingestion script, full catalogue | blocked — see below |
-| 4 | Search, library, shelves, bookmarks | |
+| 4 | Search, library, shelves, bookmarks | next |
 | 5 | PWA, offline downloads | |
 | 6 | Polish, empty/error states, skeletons | |
+
+### The player
+
+One `<audio>` element lives in the root layout, so navigating between screens
+never interrupts it. The mini-player sits above the tab bar on every screen and
+opens the full player, which can be swiped down to dismiss.
+
+Position is written to `Progress` every 5 seconds while playing, on pause, on
+chapter change, and when the tab goes away (via `sendBeacon`, which survives
+teardown where a normal `fetch` would be cancelled). There is one row per
+listener per book, so resuming is a single lookup. Reloading restores the
+chapter and second but never autoplays.
+
+Chapters auto-advance; the last one stops and marks the book finished. Speed
+(0.5x-3x), a sleep timer (5/15/30/45/60 minutes or end of chapter), skip back
+15s / forward 30s, a chapter picker and the Media Session API (lock screen and
+headphone controls) are all wired up.
+
+Not yet built, by design: the Save/shelf button and bookmarks (step 4) and the
+download button (step 5).
+
+### A note on local development
+
+`npm run db:reset` replaces the SQLite file. A `next start` server holds an open
+handle to the old one, so restart the server after resetting the database.
 
 ### Ingestion is blocked
 

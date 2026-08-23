@@ -1,7 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 import { formatDuration } from "@/lib/format";
 
 type BookCardProps = {
+  slug: string;
   title: string;
   author: string;
   narrator: string;
@@ -9,13 +11,10 @@ type BookCardProps = {
   category: string;
   totalDuration: number;
   chapterCount: number;
-  sourceUrl: string;
-  license: string;
 };
 
-// Attribution is part of the card, not an afterthought: every title shows who
-// narrated it, where it came from and under what licence.
 export function BookCard({
+  slug,
   title,
   author,
   narrator,
@@ -23,11 +22,12 @@ export function BookCard({
   category,
   totalDuration,
   chapterCount,
-  sourceUrl,
-  license,
 }: BookCardProps) {
   return (
-    <article className="flex gap-4 rounded-2xl border border-border bg-surface p-4">
+    <Link
+      href={`/book/${slug}`}
+      className="flex gap-4 rounded-2xl border border-border bg-surface p-4"
+    >
       <Image
         src={coverUrl}
         alt=""
@@ -40,26 +40,13 @@ export function BookCard({
         className="h-22 w-22 shrink-0 rounded-xl object-cover"
       />
       <div className="min-w-0 flex-1">
-        <h2 className="font-serif text-xl leading-tight">{title}</h2>
+        <h3 className="font-serif text-xl leading-tight">{title}</h3>
         <p className="mt-0.5 text-sm text-muted">{author}</p>
-        <p className="mt-2 text-xs text-muted">
-          Narrated by {narrator}
-        </p>
+        <p className="mt-2 text-xs text-muted">Narrated by {narrator}</p>
         <p className="mt-1 text-xs text-muted">
           {category} · {chapterCount} chapters · {formatDuration(totalDuration)}
         </p>
-        <p className="mt-3 text-[11px] leading-relaxed text-muted">
-          {license}{" "}
-          <a
-            href={sourceUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-accent underline underline-offset-2"
-          >
-            Source
-          </a>
-        </p>
       </div>
-    </article>
+    </Link>
   );
 }

@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
+import { BottomNav } from "@/components/bottom-nav";
+import { FullPlayer } from "@/components/player/full-player";
+import { MiniPlayer } from "@/components/player/mini-player";
+import { PlayerProvider } from "@/components/player/player-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,7 +35,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
-      <body className="font-sans min-h-full flex flex-col">{children}</body>
+      <body className="font-sans min-h-full flex flex-col">
+        {/* The player lives in the layout, above the routed content, so
+            navigating between screens never unmounts the <audio> element. */}
+        <PlayerProvider>
+          {children}
+          <MiniPlayer />
+          <BottomNav />
+          <FullPlayer />
+        </PlayerProvider>
+      </body>
     </html>
   );
 }
