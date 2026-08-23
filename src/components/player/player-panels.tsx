@@ -4,7 +4,7 @@ import { formatDuration } from "@/lib/format";
 import { PLAYBACK_SPEEDS } from "@/lib/player/types";
 import { usePlayerActions, usePlayerStatus } from "./player-context";
 
-export type PanelKind = "speed" | "sleep" | "chapters";
+export type PanelKind = "speed" | "sleep" | "chapters" | "bookmarks";
 
 const SLEEP_MINUTES = [5, 15, 30, 45, 60] as const;
 

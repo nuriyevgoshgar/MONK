@@ -95,3 +95,21 @@ export const SettingsIcon = ({ className }: IconProps) => (
     <path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8M18.4 18.4l-1.8-1.8M7.4 7.4 5.6 5.6" />
   </Svg>
 );
+
+export const BookmarkIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1Z" />
+  </Svg>
+);
+
+export const TrashIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" />
+  </Svg>
+);
+
+export const DownloadIcon = ({ className }: IconProps) => (
+  <Svg className={className}>
+    <path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" />
+  </Svg>
+);

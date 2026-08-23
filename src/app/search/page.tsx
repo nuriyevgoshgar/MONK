@@ -1,10 +1,11 @@
-import { TabPlaceholder } from "@/components/tab-placeholder";
+import { AppShell } from "@/components/app-shell";
+import { SearchView } from "@/components/search/search-view";
 
 export default function SearchPage() {
   return (
-    <TabPlaceholder
-      title="Search"
-      note="Live search across titles, authors, narrators and categories arrives with step 4."
-    />
+    <AppShell>
+      <h1 className="mb-4 font-serif text-2xl">Search</h1>
+      <SearchView />
+    </AppShell>
   );
 }

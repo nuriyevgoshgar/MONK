@@ -3,7 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { ChevronDownIcon, ListIcon, MoonIcon } from "@/components/icons";
+import {
+  BookmarkIcon,
+  ChevronDownIcon,
+  ListIcon,
+  MoonIcon,
+} from "@/components/icons";
+import { BookmarksPanel } from "./bookmarks-panel";
 import { usePlayerActions, usePlayerStatus } from "./player-context";
 import {
   ChaptersPanel,
@@ -16,6 +22,31 @@ import { TransportControls } from "./transport-controls";
 
 // Distance the sheet has to be dragged before it counts as a dismiss.
 const CLOSE_THRESHOLD_PX = 110;
+
+function OptionButton({
+  active,
+  onClick,
+  label,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`tap flex flex-1 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[10px] ${
+        active ? "bg-surface-raised text-foreground" : "text-muted"
+      }`}
+    >
+      {children}
+      {label}
+    </button>
+  );
+}
 
 export function FullPlayer() {
   const { book, chapter, expanded, error, sleep, speed } = usePlayerStatus();
@@ -130,43 +161,41 @@ export function FullPlayer() {
           <Scrubber />
           <TransportControls />
 
-          <div className="flex items-center justify-center gap-3">
-            <button
-              type="button"
+          <div className="flex items-stretch justify-center gap-2">
+            <OptionButton
+              active={activePanel === "speed"}
               onClick={() => togglePanel("speed")}
-              className={`tap rounded-xl px-4 text-sm ${
-                activePanel === "speed" ? "bg-surface-raised" : "text-muted"
-              }`}
+              label={`${speed}×`}
             >
-              {speed}×
-            </button>
-            <button
-              type="button"
+              <span className="text-sm tabular-nums">{speed}×</span>
+            </OptionButton>
+            <OptionButton
+              active={activePanel === "sleep" || sleep.kind !== "off"}
               onClick={() => togglePanel("sleep")}
-              className={`tap flex items-center gap-2 rounded-xl px-4 text-sm ${
-                activePanel === "sleep" || sleep.kind !== "off"
-                  ? "bg-surface-raised"
-                  : "text-muted"
-              }`}
+              label={sleepLabel}
             >
-              <MoonIcon className="h-4 w-4" />
-              {sleepLabel}
-            </button>
-            <button
-              type="button"
+              <MoonIcon className="h-5 w-5" />
+            </OptionButton>
+            <OptionButton
+              active={activePanel === "chapters"}
               onClick={() => togglePanel("chapters")}
-              className={`tap flex items-center gap-2 rounded-xl px-4 text-sm ${
-                activePanel === "chapters" ? "bg-surface-raised" : "text-muted"
-              }`}
+              label="Chapters"
             >
-              <ListIcon className="h-4 w-4" />
-              Chapters
-            </button>
+              <ListIcon className="h-5 w-5" />
+            </OptionButton>
+            <OptionButton
+              active={activePanel === "bookmarks"}
+              onClick={() => togglePanel("bookmarks")}
+              label="Marks"
+            >
+              <BookmarkIcon className="h-5 w-5" />
+            </OptionButton>
           </div>
 
           {activePanel === "speed" && <SpeedPanel />}
           {activePanel === "sleep" && <SleepPanel />}
           {activePanel === "chapters" && <ChaptersPanel />}
+          {activePanel === "bookmarks" && <BookmarksPanel />}
         </div>
       </div>
     </div>

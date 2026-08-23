@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { BookActions } from "@/components/book/book-actions";
 import { BookChapterList } from "@/components/book/book-chapter-list";
+import { SaveButton } from "@/components/book/save-button";
 import { db } from "@/lib/db";
 import { formatDuration } from "@/lib/format";
 import type { PlayerBook } from "@/lib/player/types";
@@ -57,6 +58,7 @@ export default async function BookPage({ params }: PageProps<"/book/[slug]">) {
       </div>
 
       <BookActions book={playerBook} />
+      <SaveButton bookId={book.id} />
 
       <p className="mt-8 text-sm leading-relaxed text-muted">
         {book.description}

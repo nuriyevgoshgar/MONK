@@ -90,11 +90,22 @@ export async function POST(request: Request) {
     );
   }
 
-  await db.progress.upsert({
-    where: { userId_bookId: { userId, bookId } },
-    create: { userId, bookId, chapterId, positionSec, finished },
-    update: { chapterId, positionSec, finished },
-  });
+  const status = finished ? "done" : "listening";
+
+  // Listening to a book is what puts it on the Listening shelf, and finishing
+  // it moves it to Finished — the listener never has to file anything by hand.
+  await db.$transaction([
+    db.progress.upsert({
+      where: { userId_bookId: { userId, bookId } },
+      create: { userId, bookId, chapterId, positionSec, finished },
+      update: { chapterId, positionSec, finished },
+    }),
+    db.shelf.upsert({
+      where: { userId_bookId: { userId, bookId } },
+      create: { userId, bookId, status },
+      update: { status },
+    }),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

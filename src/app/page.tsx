@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { BookCard } from "@/components/book-card";
 import { ContinueListening } from "@/components/continue-listening";
+import { bookSummarySelect, toBookSummary } from "@/lib/book-summary";
 import { db } from "@/lib/db";
 
 // The catalogue is read per request: prerendering would bake the seed data
@@ -8,10 +9,11 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const books = await db.book.findMany({
+  const rows = await db.book.findMany({
     orderBy: { title: "asc" },
-    include: { _count: { select: { chapters: true } } },
+    select: bookSummarySelect,
   });
+  const books = rows.map(toBookSummary);
 
   return (
     <AppShell>
@@ -31,16 +33,7 @@ export default async function HomePage() {
         <ul className="mt-3 flex flex-col gap-4">
           {books.map((book) => (
             <li key={book.id}>
-              <BookCard
-                slug={book.slug}
-                title={book.title}
-                author={book.author}
-                narrator={book.narrator}
-                coverUrl={book.coverUrl}
-                category={book.category}
-                totalDuration={book.totalDuration}
-                chapterCount={book._count.chapters}
-              />
+              <BookCard book={book} />
             </li>
           ))}
         </ul>

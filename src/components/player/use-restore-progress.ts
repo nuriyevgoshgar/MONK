@@ -1,21 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import { getDeviceId } from "@/lib/device-id";
+import { useEffect, useRef } from "react";
 import type { SavedProgress } from "@/lib/player/types";
-
-// The device id never changes once read, so there is nothing to subscribe to.
-const subscribe = () => () => {};
-const getServerSnapshot = () => null;
+import { useDeviceId } from "@/lib/use-device-id";
 
 // Identifies the listener and hands back whatever position they left behind,
 // so a reload resumes on the right chapter at the right second. Deliberately
 // never starts playback: browsers block autoplay, and it would be rude.
 export function useRestoreProgress(onRestore: (saved: SavedProgress) => void) {
-  // Read through useSyncExternalStore rather than an effect: localStorage is
-  // not available while rendering on the server, and this keeps the server
-  // and client markup identical.
-  const userId = useSyncExternalStore(subscribe, getDeviceId, getServerSnapshot);
+  const userId = useDeviceId();
 
   const onRestoreRef = useRef(onRestore);
 
