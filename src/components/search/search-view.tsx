@@ -81,6 +81,7 @@ export function SearchView() {
           </div>
         ) : (
           <>
+            <h2 className="sr-only">Search results</h2>
             <p className="mt-4 text-xs text-muted">
               {current.books.length}{" "}
               {current.books.length === 1 ? "result" : "results"} ·{" "}

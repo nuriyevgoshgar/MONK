@@ -61,6 +61,10 @@ export function LibraryView() {
         ))}
       </div>
 
+      <h2 id="shelf-heading" className="sr-only">
+        {SHELF_LABELS[tab]}
+      </h2>
+
       {entries === null ? (
         <div className="mt-4">
           <BookListSkeleton count={3} />
@@ -73,7 +77,7 @@ export function LibraryView() {
           </p>
         </div>
       ) : (
-        <ul className="mt-4 flex flex-col gap-4">
+        <ul className="mt-4 flex flex-col gap-4" aria-labelledby="shelf-heading">
           {visible.map((entry) => (
             <li key={entry.book.id}>
               <BookCard book={entry.book} />

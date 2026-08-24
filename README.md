@@ -66,6 +66,30 @@ unversioned — bumping the worker must never throw away a listener's downloads.
 The Library reads downloaded books from IndexedDB and plays them from stored
 metadata, so that screen works with no connection at all.
 
+### Lighthouse
+
+Run against `npm run build && npm run start` on localhost, mobile form factor,
+Lighthouse 13:
+
+| Screen | Performance | Accessibility | Best practices | SEO |
+| --- | --- | --- | --- | --- |
+| `/` | 96 | 100 | 100 | 100 |
+| `/book/[slug]` | 97 | 100 | 100 | 100 |
+| `/search` | 100 | 100 | 100 | 100 |
+| `/library` | 93 | 100 | 100 | 100 |
+| `/settings` | 98 | 100 | 100 | 100 |
+
+Two caveats on those numbers. **Lighthouse no longer has a PWA category** — it
+was removed in Lighthouse 12, so there is no PWA score to report; the install
+criteria are verified directly instead (manifest shape, icons, a registered
+worker, and navigation plus playback with the network off). And these runs are
+against a local server, so they say nothing about real network conditions on a
+deployed host.
+
+The one audit that fails and stays failing is `bf-cache`, because the dynamic
+routes send `Cache-Control: no-store`. Lighthouse marks both reasons "Not
+actionable"; it is the cost of rendering the catalogue per request.
+
 ### A known trade-off: soft 404s
 
 A book slug that does not exist renders the not-found screen but returns HTTP

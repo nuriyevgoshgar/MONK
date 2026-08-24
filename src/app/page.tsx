@@ -17,11 +17,16 @@ export default async function HomePage() {
 
   return (
     <AppShell>
+      {/* The visible design opens with a small section label, so the page's
+          real heading is for assistive tech only — without it the cards' h3s
+          would follow an h1 and skip a level. */}
+      <h1 className="sr-only">MONK catalogue</h1>
+
       <ContinueListening />
 
-      <h1 className="text-xs uppercase tracking-[0.15em] text-muted">
+      <h2 className="text-xs uppercase tracking-[0.15em] text-muted">
         All books
-      </h1>
+      </h2>
 
       {books.length === 0 ? (
         <p className="mt-3 rounded-2xl border border-border bg-surface p-6 text-sm text-muted">
