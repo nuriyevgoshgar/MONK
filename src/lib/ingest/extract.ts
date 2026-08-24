@@ -54,6 +54,12 @@ export function parseDuration(value: unknown): number | undefined {
 
   const text = value.trim();
 
+  // A bare number of seconds, which some feeds send as a string.
+  if (/^\d+(\.\d+)?$/.test(text)) {
+    const seconds = Math.round(Number(text));
+    return seconds > 0 ? seconds : undefined;
+  }
+
   const iso = /^P(?:\d+D)?T(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?$/i.exec(text);
   if (iso) {
     const [, h, m, s] = iso;

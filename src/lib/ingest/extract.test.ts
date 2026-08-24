@@ -16,6 +16,12 @@ test("parses clock durations", () => {
   assert.equal(parseDuration("12:34"), 754);
 });
 
+test("reads a bare number of seconds, sent as a string or a number", () => {
+  assert.equal(parseDuration("1800"), 1800);
+  assert.equal(parseDuration(1800), 1800);
+  assert.equal(parseDuration("0"), undefined);
+});
+
 test("rejects values it cannot read", () => {
   assert.equal(parseDuration("soon"), undefined);
   assert.equal(parseDuration(undefined), undefined);
