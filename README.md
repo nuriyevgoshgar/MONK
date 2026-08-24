@@ -112,16 +112,30 @@ or component dependency was added.
 `npm run db:reset` replaces the SQLite file. A `next start` server holds an open
 handle to the old one, so restart the server after resetting the database.
 
-### Ingestion is blocked
+### Ingestion: written, never run against the real site
 
-`seslikitab.org` cannot be reached from this environment — the egress proxy
-answers `403` to the CONNECT, so its `robots.txt` and terms have **not** been
-read. No ingestion code has been written and nothing has been crawled. Step 3
-stays parked until the terms can be checked from a network that can reach the
-site.
+`seslikitab.org` cannot be reached from the environment this was built in — the
+egress proxy answers `403` to the CONNECT — so its `robots.txt` and terms have
+**not** been read by a human, and **nothing has been crawled**.
 
-Everything in `prisma/seed-data/books.json` is hand-written: public domain works
-with locally generated placeholder narration, not real recordings.
+The crawler in `scripts/ingest.ts` therefore enforces the rules itself, at
+runtime, rather than relying on someone having checked them first:
+
+- **robots.txt is fetched before anything else and obeyed.** Longest-match
+  Allow/Disallow per RFC 9309, `*` and `$` wildcards, and `Crawl-delay`. If it
+  disallows the catalogue the run aborts. If it cannot be read at all the run
+  aborts too — an unreadable robots.txt is treated as "no", never as
+  permission.
+- **One request at a time**, at least `INGEST_DELAY_MS` apart (floor 1s, raised
+  to match `Crawl-delay`), with a `User-Agent` that identifies the crawler and
+  backs off on 429/5xx honouring `Retry-After`.
+- **Only public domain or freely licensed titles are kept.** A title with no
+  stated licence is skipped, not assumed free; so is anything reserving rights.
+  Every decision is logged to `logs/ingest.jsonl`.
+
+Everything currently in the database comes from `prisma/seed-data/books.json`:
+hand-written public domain works with locally generated placeholder narration,
+not real recordings.
 
 ---
 
@@ -168,6 +182,8 @@ npm run sample:audio
 | `npm run covers` | Redraw placeholder cover art |
 | `npm run icons` | Redraw the PWA icons |
 | `npm run sample:audio` | Render placeholder narration |
+| `npm run ingest` | Crawl the catalogue (dry run unless `-- --write`) |
+| `npm test` | Unit tests for the ingestion logic |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 
 ### Seeding
@@ -178,17 +194,45 @@ chapters dropped from the seed file are deleted. To change the catalogue, edit
 `prisma/seed-data/books.json` and re-run `npm run covers && npm run sample:audio
 && npm run db:seed`.
 
-### Running the ingestion script (step 3, not yet written)
+### Running the ingestion script
 
-It will live at `scripts/ingest.ts` and read its configuration from the
-environment — never hardcoded:
+```bash
+npm run ingest                     # 5 books, dry run — prints what it parsed
+npm run ingest -- --write          # same, but saves to the database
+npm run ingest -- --limit 200 --pages 20 --write
+```
 
-- `INGEST_BASE_URL` — catalogue root
-- `INGEST_USER_AGENT` — identifies the crawler to the source site
-- `INGEST_DELAY_MS` — politeness delay, keep at 1000 or higher
+Writing is opt-in: the default run shows what it parsed and saves nothing, so
+the first pass can be reviewed before anything touches the database. Re-running
+is safe — books upsert on `sourceUrl`, chapters on `(bookId, index)`.
 
-It will be run against 5 titles first for review before any full crawl, will
-upsert on `Book.sourceUrl`, and will log skipped or broken items to a file.
+Configuration comes from the environment, never hardcoded:
+
+| Variable | Purpose |
+| --- | --- |
+| `INGEST_BASE_URL` | Catalogue root |
+| `INGEST_CATALOG_PATH` | Page the crawl starts from |
+| `INGEST_BOOK_URL_PATTERN` | Which paths count as a book page |
+| `INGEST_USER_AGENT` | Identifies the crawler to the source site |
+| `INGEST_DELAY_MS` | Politeness delay; floor of 1s, raised by `Crawl-delay` |
+
+**Expect the selectors to need tuning.** Extraction reads structured data first
+(schema.org JSON-LD), then OpenGraph tags, then falls back to regex over the
+HTML — an order chosen so the fragile part is last. None of it has seen the real
+site's markup. Start with the dry run and read `logs/ingest.jsonl`; correct the
+URL shape via `INGEST_BOOK_URL_PATTERN` before touching code.
+
+The logic that does not depend on the live site is covered by tests:
+
+```bash
+npm test
+```
+
+32 assertions over robots.txt matching, the licence gate, duration parsing,
+slug generation, link discovery and extraction. The crawler was also run
+end to end against a local fixture server: it aborts when robots.txt
+disallows, aborts when robots.txt is unreadable, ingests only the freely
+licensed title, and stays idempotent across repeated runs.
 
 ---
 

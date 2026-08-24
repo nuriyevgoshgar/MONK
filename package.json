@@ -16,7 +16,9 @@
     "setup": "prisma generate && prisma db push && npm run covers && npm run icons && npm run sample:audio && npm run db:seed",
     "postinstall": "prisma generate",
     "covers": "node scripts/make-covers.mjs",
-    "icons": "node scripts/make-icons.mjs"
+    "icons": "node scripts/make-icons.mjs",
+    "ingest": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/ingest.ts",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON 'src/**/*.test.ts'"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",
@@ -36,5 +38,5 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "description": "MONK — a mobile-first audiobook web app."
+  "description": "MONK \u2014 a mobile-first audiobook web app."
 }

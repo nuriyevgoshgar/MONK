@@ -49,3 +49,6 @@ next-env.d.ts
 
 # generated placeholder narration (npm run sample:audio)
 /public/samples
+
+# ingestion run reports
+/logs
