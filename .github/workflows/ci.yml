@@ -1,8 +1,10 @@
 name: CI
 
+# Push is limited to main: a branch with an open pull request would otherwise
+# run this twice, once per event, for the same commit.
 on:
   push:
-    branches: ["**"]
+    branches: ["main"]
   pull_request:
 
 # A newer push to the same branch makes the older run irrelevant.
