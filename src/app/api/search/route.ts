@@ -7,8 +7,9 @@ export const dynamic = "force-dynamic";
 const MAX_RESULTS = 40;
 
 // GET /api/search?q=… — title, author, narrator or category.
-// SQLite's LIKE is already case-insensitive for ASCII, which is why there is
-// no `mode: "insensitive"` here (Prisma does not support it on SQLite).
+// `mode: "insensitive"` is required: Postgres LIKE is case-sensitive, so
+// without it "twain" would not find "Mark Twain". SQLite folded ASCII case on
+// its own, which hid this until the move to Postgres.
 export async function GET(request: Request) {
   const query = new URL(request.url).searchParams.get("q")?.trim() ?? "";
 
@@ -23,10 +24,10 @@ export async function GET(request: Request) {
   const books = await db.book.findMany({
     where: {
       OR: [
-        { title: { contains: query } },
-        { author: { contains: query } },
-        { narrator: { contains: query } },
-        { category: { contains: query } },
+        { title: { contains: query, mode: "insensitive" } },
+        { author: { contains: query, mode: "insensitive" } },
+        { narrator: { contains: query, mode: "insensitive" } },
+        { category: { contains: query, mode: "insensitive" } },
       ],
     },
     orderBy: { title: "asc" },

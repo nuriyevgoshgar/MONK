@@ -26,9 +26,26 @@ jobs:
       contents: write
 
     env:
-      DATABASE_URL: "file:./prisma/ingest.db"
+      # A throwaway database: the crawl fills it, the export reads it, and the
+      # runner is discarded. Nothing here touches the deployed database.
+      DATABASE_URL: "postgresql://monk:monk@localhost:5432/monk"
       INGEST_DELAY_MS: "1000"
       INGEST_USER_AGENT: "MONK/0.1 (+https://github.com/${{ github.repository }})"
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: monk
+          POSTGRES_PASSWORD: monk
+          POSTGRES_DB: monk
+        ports: ["5432:5432"]
+        # Steps must not start before the server accepts connections.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +60,7 @@ jobs:
       - run: npm ci
 
       - name: Create the database
-        run: npm run db:push
+        run: npm run db:migrate
 
       - name: Ingest
         run: |
