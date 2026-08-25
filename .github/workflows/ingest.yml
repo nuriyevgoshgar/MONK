@@ -15,7 +15,7 @@ on:
         default: "200"
       language:
         description: "librivox only — language filter (e.g. English, Turkish). Blank = all"
-        default: ""
+        default: "Turkish"
       base_url:
         description: "html only — catalogue site"
         default: "https://seslikitab.org"
