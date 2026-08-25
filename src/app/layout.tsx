@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0b0a",
+  themeColor: "#000000",
   // The player and bottom nav sit on the safe area on phones.
   viewportFit: "cover",
 };

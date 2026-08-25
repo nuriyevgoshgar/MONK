@@ -9,8 +9,8 @@ import path from "node:path";
 
 const OUT_DIR = path.join(path.resolve(import.meta.dirname, ".."), "public", "icons");
 
-const BACKGROUND = [0x17, 0x15, 0x0f];
-const ACCENT = [0xc8, 0x8a, 0x4a];
+const BACKGROUND = [0x10, 0x10, 0x10];
+const ACCENT = [0xff, 0xff, 0xff];
 
 // The MONK "M", as four thick strokes in a unit box.
 const STROKES = [

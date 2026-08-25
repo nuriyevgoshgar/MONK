@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
-/* MONK — a reading room. Deep dark ground, one warm accent, lots of air.
-   Light theme is deliberately deferred; these tokens are the single place it
-   will be added. */
+/* MONK — a reading room. Black ground, no hue anywhere, lots of air.
+   With colour gone, hierarchy is carried entirely by luminance, so the steps
+   below are deliberately spaced: accent is the brightest thing on the page and
+   sits above foreground, which is why an active tab or a link still reads as
+   emphasis rather than as ordinary text. */
 :root {
-  --background: #0c0b0a;
-  --surface: #171512;
-  --surface-raised: #211e1a;
-  --border: #2a2621;
-  --foreground: #ede7df;
-  --muted: #9a9086;
-  --accent: #c88a4a;
-  --accent-soft: #3a2b1b;
+  --background: #000000;
+  --surface: #101010;
+  --surface-raised: #1c1c1c;
+  --border: #2e2e2e;
+  --foreground: #e4e4e4;
+  --muted: #8a8a8a;
+  --accent: #ffffff;
+  --accent-soft: #242424;
 }
 
 @theme inline {
@@ -37,27 +39,30 @@
   color-scheme: light;
 }
 
+/* Inverted, and inverted consistently: accent becomes the darkest value so
+   `bg-accent text-background` stays a solid button in either theme. Surface is
+   brighter than the page here, the opposite of dark, so cards still lift. */
 :root[data-theme="light"] {
-  --background: #faf7f2;
+  --background: #f4f4f4;
   --surface: #ffffff;
-  --surface-raised: #f1ece4;
-  --border: #e3dbd1;
-  --foreground: #1a1714;
-  --muted: #6e655c;
-  --accent: #a2621f;
-  --accent-soft: #f6e8d8;
+  --surface-raised: #e9e9e9;
+  --border: #d8d8d8;
+  --foreground: #1b1b1b;
+  --muted: #616161;
+  --accent: #000000;
+  --accent-soft: #e2e2e2;
 }
 
 @media (prefers-color-scheme: light) {
   :root[data-theme="system"] {
-    --background: #faf7f2;
+    --background: #f4f4f4;
     --surface: #ffffff;
-    --surface-raised: #f1ece4;
-    --border: #e3dbd1;
-    --foreground: #1a1714;
-    --muted: #6e655c;
-    --accent: #a2621f;
-    --accent-soft: #f6e8d8;
+    --surface-raised: #e9e9e9;
+    --border: #d8d8d8;
+    --foreground: #1b1b1b;
+    --muted: #616161;
+    --accent: #000000;
+    --accent-soft: #e2e2e2;
   }
 }
 
