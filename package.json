@@ -1,0 +1,43 @@
+{
+  "name": "monk",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON prisma/seed.mts",
+    "db:reset": "prisma db push --force-reset && npm run db:seed",
+    "sample:audio": "node scripts/make-sample-audio.mjs",
+    "setup": "prisma generate && prisma db push && npm run covers && npm run icons && npm run sample:audio && npm run db:seed",
+    "postinstall": "prisma generate",
+    "covers": "node scripts/make-covers.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "ingest": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/ingest.ts",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON 'src/**/*.test.ts'",
+    "catalog:export": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/export-catalog.mjs"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.2",
+    "prisma": "^7.9.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "description": "MONK — a mobile-first audiobook web app."
+}

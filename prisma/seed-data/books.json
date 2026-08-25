@@ -1,0 +1,94 @@
+{
+  "_note": "Hand-written development seed (build step 1). Descriptions are written for MONK; the works themselves are public domain. Narration is a locally generated placeholder tone, not a real recording — real catalog data replaces this in the ingestion step.",
+  "books": [
+    {
+      "slug": "frankenstein",
+      "title": "Frankenstein",
+      "author": "Mary Shelley",
+      "narrator": "MONK sample narration",
+      "coverUrl": "/covers/frankenstein.svg",
+      "description": "A student of natural philosophy builds a living creature, abandons it, and spends the rest of his life pursued by what he made. Told as a chain of letters and confessions across Europe and the Arctic ice.",
+      "category": "Classics",
+      "language": "en",
+      "sourceUrl": "https://www.gutenberg.org/ebooks/84",
+      "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
+      "chapters": [
+        { "title": "Letters", "duration": 48 },
+        { "title": "The Student at Ingolstadt", "duration": 62 },
+        { "title": "The Creature Speaks", "duration": 55 },
+        { "title": "Pursuit on the Ice", "duration": 41 }
+      ]
+    },
+    {
+      "slug": "pride-and-prejudice",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "narrator": "MONK sample narration",
+      "coverUrl": "/covers/pride-and-prejudice.svg",
+      "description": "Five sisters, a small income, and a neighbourhood full of opinions. A comedy of manners about how quickly a first impression forms and how slowly it gives way.",
+      "category": "Classics",
+      "language": "en",
+      "sourceUrl": "https://www.gutenberg.org/ebooks/1342",
+      "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
+      "chapters": [
+        { "title": "A Single Man in Possession", "duration": 44 },
+        { "title": "The Assembly at Meryton", "duration": 58 },
+        { "title": "Netherfield", "duration": 51 },
+        { "title": "Pemberley", "duration": 66 }
+      ]
+    },
+    {
+      "slug": "the-metamorphosis",
+      "title": "The Metamorphosis",
+      "author": "Franz Kafka",
+      "narrator": "MONK sample narration",
+      "coverUrl": "/covers/the-metamorphosis.svg",
+      "description": "A travelling salesman wakes up changed into something his family cannot look at. A short, close, domestic account of a household rearranging itself around a locked door.",
+      "category": "Classics",
+      "language": "en",
+      "sourceUrl": "https://www.gutenberg.org/ebooks/5200",
+      "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
+      "chapters": [
+        { "title": "The Morning", "duration": 53 },
+        { "title": "The Locked Room", "duration": 47 },
+        { "title": "The Lodgers", "duration": 60 }
+      ]
+    },
+    {
+      "slug": "alices-adventures-in-wonderland",
+      "title": "Alice's Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "narrator": "MONK sample narration",
+      "coverUrl": "/covers/alices-adventures-in-wonderland.svg",
+      "description": "A girl follows a hurried rabbit underground and finds a place run entirely on its own logic, where the rules of size, time and conversation keep changing without warning.",
+      "category": "Children",
+      "language": "en",
+      "sourceUrl": "https://www.gutenberg.org/ebooks/11",
+      "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
+      "chapters": [
+        { "title": "Down the Rabbit-Hole", "duration": 42 },
+        { "title": "A Pool of Tears", "duration": 39 },
+        { "title": "A Mad Tea-Party", "duration": 57 },
+        { "title": "The Trial", "duration": 45 }
+      ]
+    },
+    {
+      "slug": "the-time-machine",
+      "title": "The Time Machine",
+      "author": "H. G. Wells",
+      "narrator": "MONK sample narration",
+      "coverUrl": "/covers/the-time-machine.svg",
+      "description": "An inventor tells a room of sceptical dinner guests what he found eight hundred thousand years ahead: a gentle people in a garden, and the machinery humming underneath them.",
+      "category": "Science Fiction",
+      "language": "en",
+      "sourceUrl": "https://www.gutenberg.org/ebooks/35",
+      "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
+      "chapters": [
+        { "title": "The Dinner Party", "duration": 46 },
+        { "title": "The Year 802,701", "duration": 64 },
+        { "title": "Underground", "duration": 52 },
+        { "title": "The Further Vision", "duration": 40 }
+      ]
+    }
+  ]
+}

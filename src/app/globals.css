@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* MONK — a reading room. Deep dark ground, one warm accent, lots of air.
+   Light theme is deliberately deferred; these tokens are the single place it
+   will be added. */
+:root {
+  --background: #0c0b0a;
+  --surface: #171512;
+  --surface-raised: #211e1a;
+  --border: #2a2621;
+  --foreground: #ede7df;
+  --muted: #9a9086;
+  --accent: #c88a4a;
+  --accent-soft: #3a2b1b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+}
+
+/* Light theme. Dark above is the default and needs no attribute, so the very
+   first paint is dark even before the theme choice is read from storage.
+   Light applies only when it is asked for: explicitly, or via System on a
+   light desktop. */
+:root[data-theme="light"],
+:root[data-theme="system"] {
+  color-scheme: light;
+}
+
+:root[data-theme="light"] {
+  --background: #faf7f2;
+  --surface: #ffffff;
+  --surface-raised: #f1ece4;
+  --border: #e3dbd1;
+  --foreground: #1a1714;
+  --muted: #6e655c;
+  --accent: #a2621f;
+  --accent-soft: #f6e8d8;
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --background: #faf7f2;
+    --surface: #ffffff;
+    --surface-raised: #f1ece4;
+    --border: #e3dbd1;
+    --foreground: #1a1714;
+    --muted: #6e655c;
+    --accent: #a2621f;
+    --accent-soft: #f6e8d8;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    color-scheme: dark;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Every tap target in the app is at least this tall. */
+@utility tap {
+  min-height: 44px;
+  min-width: 44px;
+}

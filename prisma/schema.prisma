@@ -1,0 +1,112 @@
+// MONK — audiobook app schema.
+// Local dev runs on SQLite; switching to Postgres later only means changing
+// `provider` below and pointing DATABASE_URL at the new server.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  // Emit explicit .ts extensions on internal imports so plain `node` can run
+  // scripts (seed, ingestion) against the client without a TS runner.
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Book {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  author        String
+  narrator      String
+  coverUrl      String
+  description   String
+  category      String
+  language      String
+  // Sum of every chapter duration, in seconds.
+  totalDuration Int
+  // Page the title was ingested from. Shown on the book page and used as the
+  // idempotency key when the ingestion script re-runs.
+  sourceUrl     String    @unique
+  license       String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  chapters  Chapter[]
+  progress  Progress[]
+  bookmarks Bookmark[]
+  shelves   Shelf[]
+
+  @@index([category])
+  @@index([author])
+  @@index([narrator])
+}
+
+model Chapter {
+  id       String @id @default(cuid())
+  bookId   String
+  // Zero-based position in the book.
+  index    Int
+  title    String
+  audioUrl String
+  // Length in seconds.
+  duration Int
+
+  book      Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  progress  Progress[]
+  bookmarks Bookmark[]
+
+  @@unique([bookId, index])
+  @@index([bookId])
+}
+
+// Where the listener stopped in a book. One row per user per book: the player
+// writes the chapter it is on plus the offset inside that chapter.
+model Progress {
+  id          String   @id @default(cuid())
+  // Device id from localStorage today; a real user id once auth lands.
+  userId      String
+  bookId      String
+  chapterId   String
+  positionSec Int      @default(0)
+  finished    Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  book    Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([userId, updatedAt])
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  bookId      String
+  chapterId   String
+  positionSec Int
+  note        String?
+  createdAt   DateTime @default(now())
+
+  book    Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([userId, bookId])
+}
+
+// A book the user put on a shelf. `status` is one of the ShelfStatus values in
+// src/lib/shelf.ts — SQLite has no enum type, so it is validated in app code.
+model Shelf {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([userId, status])
+}

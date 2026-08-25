@@ -1,0 +1,55 @@
+name: CI
+
+# Push is limited to main: a branch with an open pull request would otherwise
+# run this twice, once per event, for the same commit.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+# A newer push to the same branch makes the older run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    env:
+      # Prisma's config throws without this, and `postinstall` runs
+      # `prisma generate`, so it has to be set before install.
+      DATABASE_URL: "file:./prisma/ci.db"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Proves the schema applies and the seed is re-runnable, which is the
+      # part most likely to rot unnoticed.
+      - name: Database schema and seed
+        run: |
+          npm run db:push
+          npm run covers
+          npm run sample:audio
+          npm run db:seed
+          npm run db:seed
