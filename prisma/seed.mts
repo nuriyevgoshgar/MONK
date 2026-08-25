@@ -10,6 +10,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { db } from "../src/lib/db.ts";
+import { uniqueSlug } from "../src/lib/ingest/persist.ts";
 
 type SeedChapter = {
   title: string;
@@ -62,6 +63,10 @@ async function loadCatalog(): Promise<CatalogBook[]> {
 
 async function seedCatalogBook(book: CatalogBook) {
   const totalDuration = book.chapters.reduce((sum, c) => sum + c.duration, 0);
+  // An ingested title can collide with a hand-written one — LibriVox's
+  // "Pride and Prejudice" slugifies to the same thing as the development
+  // book of that name, but they are different rows with different sources.
+  const slug = await uniqueSlug(book.slug, book.sourceUrl);
 
   const fields = {
     title: book.title,
@@ -77,8 +82,8 @@ async function seedCatalogBook(book: CatalogBook) {
 
   const record = await db.book.upsert({
     where: { sourceUrl: book.sourceUrl },
-    create: { sourceUrl: book.sourceUrl, slug: book.slug, ...fields },
-    update: { slug: book.slug, ...fields },
+    create: { sourceUrl: book.sourceUrl, slug, ...fields },
+    update: { slug, ...fields },
   });
 
   for (const [index, chapter] of book.chapters.entries()) {
