@@ -82,11 +82,29 @@ function narratorName(sections: LibriVoxSection[]): string {
   return [...tally.keys()][0];
 }
 
-// Recordings live on archive.org, which serves a cover image per item; the
-// item identifier is embedded in the zip download URL.
+// Recordings live on archive.org, which serves a cover image per item. The item
+// identifier appears in the download path.
+//
+// The zip URL is checked first but is often absent from the feed — a real run
+// of 200 books returned it for none of them — so the fall back is the first
+// chapter's audio URL, which every entry has by definition.
+const ARCHIVE_ITEM = /archive\.org\/download\/([^/]+)\//;
+
+function archiveIdentifier(book: LibriVoxBook): string | null {
+  const fromZip = ARCHIVE_ITEM.exec(book.url_zip_file ?? "");
+  if (fromZip) return fromZip[1];
+
+  for (const section of book.sections ?? []) {
+    const fromAudio = ARCHIVE_ITEM.exec(section.listen_url ?? "");
+    if (fromAudio) return fromAudio[1];
+  }
+
+  return null;
+}
+
 function coverFromArchive(book: LibriVoxBook): string {
-  const match = /archive\.org\/download\/([^/]+)\//.exec(book.url_zip_file ?? "");
-  return match ? `https://archive.org/services/img/${match[1]}` : "";
+  const identifier = archiveIdentifier(book);
+  return identifier ? `https://archive.org/services/img/${identifier}` : "";
 }
 
 export function toSourceBook(book: LibriVoxBook): SourceBook | null {

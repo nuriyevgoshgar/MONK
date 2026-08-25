@@ -79,6 +79,40 @@ test("derives the cover from the archive.org item identifier", () => {
   );
 });
 
+test("falls back to the audio URL when the feed omits the zip URL", () => {
+  // A real run of 200 books returned no url_zip_file at all, so this is the
+  // path that actually runs.
+  const raw = entry();
+  raw.url_zip_file = undefined;
+
+  assert.equal(
+    toSourceBook(raw)?.coverUrl,
+    "https://archive.org/services/img/fixture_voyage_1234",
+  );
+});
+
+test("handles both archive.org and www.archive.org audio hosts", () => {
+  // The live feed mixes the two: 188 of 200 books used the www host.
+  const raw = entry();
+  raw.url_zip_file = undefined;
+  raw.sections[0].listen_url =
+    "https://www.archive.org/download/huck_finn_librivox/huckfinn_01_64kb.mp3";
+  raw.sections[1].listen_url = raw.sections[0].listen_url;
+
+  assert.equal(
+    toSourceBook(raw)?.coverUrl,
+    "https://archive.org/services/img/huck_finn_librivox",
+  );
+});
+
+test("leaves the cover empty when nothing yields an identifier", () => {
+  const raw = entry();
+  raw.url_zip_file = undefined;
+  raw.sections.forEach((s) => (s.listen_url = "https://example.test/a.mp3"));
+
+  assert.equal(toSourceBook(raw)?.coverUrl, "");
+});
+
 test("reads both seconds and clock playtimes", () => {
   const book = toSourceBook(entry());
   assert.equal(book?.chapters[0].duration, 1800);

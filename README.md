@@ -3,8 +3,8 @@
 A mobile-first audiobook web app. Deep dark, one warm accent, no clutter —
 built for listening rather than browsing.
 
-Next.js (App Router) · TypeScript · Tailwind CSS · Prisma + SQLite · deploys to
-Vercel.
+Next.js (App Router) · TypeScript · Tailwind CSS · Prisma + Postgres · deploys
+to Vercel.
 
 ---
 
@@ -41,9 +41,9 @@ headphone controls) are all wired up.
 
 ### Search, shelves and bookmarks
 
-Search is debounced at 150ms and covers title, author, narrator and category.
-SQLite's `LIKE` is already case-insensitive for ASCII, which is why there is no
-`mode: "insensitive"` (Prisma does not support it on SQLite).
+Search is debounced at 150ms and covers title, author, narrator and category,
+case-insensitively — Postgres `LIKE` is case-sensitive, so the query sets
+`mode: "insensitive"` explicitly.
 
 Shelves fill themselves: pressing play files a book under Listening, finishing
 it moves it to Finished, and Save keeps one for later. Progress and shelf are
@@ -109,8 +109,7 @@ or component dependency was added.
 
 ### A note on local development
 
-`npm run db:reset` replaces the SQLite file. A `next start` server holds an open
-handle to the old one, so restart the server after resetting the database.
+`npm run db:reset` drops and recreates every table, then re-seeds.
 
 ### Ingestion: written, never run against the real site
 
@@ -142,18 +141,26 @@ not real recordings.
 ## Setup
 
 Requires Node 20.12+ (22 recommended — the scripts use native `.env` loading and
-TypeScript type stripping).
+TypeScript type stripping) and a Postgres database. Any Postgres will do: a
+local server, a container, or a hosted one.
 
 ```bash
 npm install
-cp .env.example .env
+cp .env.example .env      # then set DATABASE_URL
 npm run setup
 npm run dev
 ```
 
-`npm run setup` generates the Prisma client, creates the SQLite database, draws
-the placeholder covers, renders the sample audio, and seeds the catalogue. Open
+`npm run setup` generates the Prisma client, applies the migration, draws the
+placeholder covers, renders the sample audio, and seeds the catalogue. Open
 http://localhost:3000.
+
+A container is the quickest local database:
+
+```bash
+docker run --name monk-pg -e POSTGRES_USER=monk -e POSTGRES_PASSWORD=monk \
+  -e POSTGRES_DB=monk -p 5432:5432 -d postgres:16
+```
 
 ### Sample audio
 
@@ -175,7 +182,8 @@ npm run sample:audio
 | `npm run dev` | Development server |
 | `npm run build` | Generate the Prisma client, then build |
 | `npm run setup` | Full first-run: client, database, covers, audio, seed |
-| `npm run db:push` | Apply `prisma/schema.prisma` to the database |
+| `npm run db:migrate` | Apply migrations to the database |
+| `npm run db:push` | Push the schema without a migration (development only) |
 | `npm run db:seed` | Seed from `prisma/seed-data/books.json` (re-runnable) |
 | `npm run db:reset` | Drop everything and re-seed |
 | `npm run db:studio` | Browse the database in Prisma Studio |
@@ -249,11 +257,16 @@ no enum type — the allowed values live in `src/lib/shelf.ts`.
 Progress is stored as a chapter plus an offset inside it, one row per user per
 book, so resuming means loading a single row.
 
-### Moving to Postgres
+### Deploying
 
-1. Change `provider` in `prisma/schema.prisma` to `postgresql`.
-2. Swap the adapter in `src/lib/db.ts` for `@prisma/adapter-pg`.
-3. Point `DATABASE_URL` at the new server and run `npm run db:push`.
+`npm run build` applies migrations and seeds before building, so a host needs
+nothing but `DATABASE_URL`: push, and the deployed app comes up with the schema
+and the catalogue already in place. Seeding is upsert-based, so repeating it on
+every deploy changes nothing and costs a few seconds.
+
+The project started on SQLite and moved to Postgres because a serverless host
+has no writable filesystem: progress, bookmarks and shelves are all writes, and
+they would have failed on every request.
 
 ---
 

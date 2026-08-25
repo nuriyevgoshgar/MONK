@@ -26,7 +26,7 @@ export type IngestableBook = {
 };
 
 /** Appends a counter if the slug is taken by a different source URL. */
-async function uniqueSlug(base: string, sourceUrl: string): Promise<string> {
+export async function uniqueSlug(base: string, sourceUrl: string): Promise<string> {
   for (let attempt = 0; attempt < 50; attempt += 1) {
     const candidate = attempt === 0 ? base : `${base}-${attempt + 1}`;
     const clash = await db.book.findUnique({

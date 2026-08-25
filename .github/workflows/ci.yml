@@ -19,7 +19,22 @@ jobs:
     env:
       # Prisma's config throws without this, and `postinstall` runs
       # `prisma generate`, so it has to be set before install.
-      DATABASE_URL: "file:./prisma/ci.db"
+      DATABASE_URL: "postgresql://monk:monk@localhost:5432/monk"
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: monk
+          POSTGRES_PASSWORD: monk
+          POSTGRES_DB: monk
+        ports: ["5432:5432"]
+        # Steps must not start before the server accepts connections.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -44,11 +59,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Proves the schema applies and the seed is re-runnable, which is the
+      # Proves the migration applies and the seed is re-runnable, which is the
       # part most likely to rot unnoticed.
       - name: Database schema and seed
         run: |
-          npm run db:push
+          npm run db:migrate
           npm run covers
           npm run sample:audio
           npm run db:seed

@@ -1,6 +1,6 @@
 // MONK — audiobook app schema.
-// Local dev runs on SQLite; switching to Postgres later only means changing
-// `provider` below and pointing DATABASE_URL at the new server.
+// Postgres everywhere: a serverless host has no writable filesystem, so the
+// SQLite file the project started on could not survive deployment.
 
 generator client {
   provider            = "prisma-client"
@@ -11,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Book {
@@ -96,7 +96,8 @@ model Bookmark {
 }
 
 // A book the user put on a shelf. `status` is one of the ShelfStatus values in
-// src/lib/shelf.ts — SQLite has no enum type, so it is validated in app code.
+// src/lib/shelf.ts, validated in app code rather than by a database enum so
+// adding a shelf later needs no migration.
 model Shelf {
   id        String   @id @default(cuid())
   userId    String

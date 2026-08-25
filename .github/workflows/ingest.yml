@@ -14,8 +14,20 @@ on:
         description: "How many books at most (large numbers make a large JSON file)"
         default: "200"
       language:
-        description: "Language filter, LibriVox spelling (e.g. English, Turkish). Blank = all"
+        description: "librivox only — language filter (e.g. English, Turkish). Blank = all"
         default: "Turkish"
+      base_url:
+        description: "html only — catalogue site"
+        default: "https://seslikitab.org"
+      catalog_path:
+        description: "html only — page the crawl starts from"
+        default: "/"
+      book_url_pattern:
+        description: "html only — which paths are book pages (regex)"
+        default: "/(kitap|book|audiobook|sesli-kitap)/[^/]+/?$"
+      pages:
+        description: "html only — how many catalogue pages to walk"
+        default: "5"
 
 jobs:
   ingest:
@@ -26,9 +38,30 @@ jobs:
       contents: write
 
     env:
-      DATABASE_URL: "file:./prisma/ingest.db"
+      # A throwaway database: the crawl fills it, the export reads it, and the
+      # runner is discarded. Nothing here touches the deployed database.
+      DATABASE_URL: "postgresql://monk:monk@localhost:5432/monk"
       INGEST_DELAY_MS: "1000"
       INGEST_USER_AGENT: "MONK/0.1 (+https://github.com/${{ github.repository }})"
+      # Only read by the html source; librivox ignores them.
+      INGEST_BASE_URL: ${{ inputs.base_url }}
+      INGEST_CATALOG_PATH: ${{ inputs.catalog_path }}
+      INGEST_BOOK_URL_PATTERN: ${{ inputs.book_url_pattern }}
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: monk
+          POSTGRES_PASSWORD: monk
+          POSTGRES_DB: monk
+        ports: ["5432:5432"]
+        # Steps must not start before the server accepts connections.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -43,13 +76,14 @@ jobs:
       - run: npm ci
 
       - name: Create the database
-        run: npm run db:push
+        run: npm run db:migrate
 
       - name: Ingest
         run: |
           npm run ingest -- \
             --source "${{ inputs.source }}" \
             --limit "${{ inputs.limit }}" \
+            --pages "${{ inputs.pages }}" \
             ${{ inputs.language && format('--language "{0}"', inputs.language) || '' }} \
             --write
 
