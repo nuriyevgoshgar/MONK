@@ -9,16 +9,13 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "../src/generated/prisma/client.ts";
+// The shared client, rather than a second one built here: this script used to
+// construct its own, which silently kept the SQLite adapter when the app moved
+// to Postgres. A crawl of 200 books then died at the export step.
+import { db } from "../src/lib/db.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const OUT = path.join(ROOT, "prisma", "seed-data", "catalog.json");
-
-const url = process.env.DATABASE_URL;
-if (!url) throw new Error("DATABASE_URL is not set.");
-
-const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) });
 
 try {
   const books = await db.book.findMany({

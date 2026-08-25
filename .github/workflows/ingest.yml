@@ -90,7 +90,10 @@ jobs:
       - name: Export the catalogue
         run: npm run catalog:export
 
+      # Always: a failed run is exactly when the report is worth reading. When
+      # the export step broke, this was skipped and the run looked silent.
       - name: Report
+        if: always()
         run: |
           {
             echo "### Ingestion result"
@@ -101,6 +104,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload the run report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ingest-report
