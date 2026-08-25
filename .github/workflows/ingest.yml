@@ -1,0 +1,89 @@
+name: Ingest catalogue
+
+# Run by hand from the Actions tab. Ingestion reaches out to a third-party
+# site, so it is never automatic — someone decides each time.
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Where to ingest from"
+        type: choice
+        options: ["librivox", "html"]
+        default: "librivox"
+      limit:
+        description: "How many books at most (large numbers make a large JSON file)"
+        default: "200"
+      language:
+        description: "Language filter, LibriVox spelling (e.g. English, Turkish). Blank = all"
+        default: ""
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # The exported catalogue is committed back to the branch.
+      contents: write
+
+    env:
+      DATABASE_URL: "file:./prisma/ingest.db"
+      INGEST_DELAY_MS: "1000"
+      INGEST_USER_AGENT: "MONK/0.1 (+https://github.com/${{ github.repository }})"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Create the database
+        run: npm run db:push
+
+      - name: Ingest
+        run: |
+          npm run ingest -- \
+            --source "${{ inputs.source }}" \
+            --limit "${{ inputs.limit }}" \
+            ${{ inputs.language && format('--language "{0}"', inputs.language) || '' }} \
+            --write
+
+      - name: Export the catalogue
+        run: npm run catalog:export
+
+      - name: Report
+        run: |
+          {
+            echo "### Ingestion result"
+            echo ""
+            echo '```'
+            tail -n 40 logs/ingest.jsonl 2>/dev/null || echo "(no report file)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the run report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingest-report
+          path: logs/ingest.jsonl
+          if-no-files-found: ignore
+
+      - name: Commit the catalogue
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prisma/seed-data/catalog.json
+
+          if git diff --cached --quiet; then
+            echo "Catalogue unchanged; nothing to commit."
+            exit 0
+          fi
+
+          COUNT=$(node -e "console.log(require('./prisma/seed-data/catalog.json').books.length)")
+          git commit -m "Ingest ${COUNT} books from ${{ inputs.source }}"
+          git push

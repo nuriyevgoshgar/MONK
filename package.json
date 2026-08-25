@@ -18,7 +18,8 @@
     "covers": "node scripts/make-covers.mjs",
     "icons": "node scripts/make-icons.mjs",
     "ingest": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/ingest.ts",
-    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON 'src/**/*.test.ts'"
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON 'src/**/*.test.ts'",
+    "catalog:export": "node --env-file-if-exists=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/export-catalog.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.1",
