@@ -34,11 +34,11 @@ const escape = (value) =>
 
 function coverSvg({ title, author, initials }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="${escape(title)} by ${escape(author)}">
-  <rect width="600" height="600" fill="#17150F"/>
-  <rect x="0" y="0" width="14" height="600" fill="#C88A4A"/>
-  <text x="300" y="330" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="260" fill="#EDE7DF">${escape(initials)}</text>
-  <line x1="230" y1="400" x2="370" y2="400" stroke="#C88A4A" stroke-width="10"/>
-  <text x="300" y="500" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="46" letter-spacing="14" fill="#6E655C">MONK</text>
+  <rect width="600" height="600" fill="#101010"/>
+  <rect x="0" y="0" width="14" height="600" fill="#FFFFFF"/>
+  <text x="300" y="330" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="260" fill="#E4E4E4">${escape(initials)}</text>
+  <line x1="230" y1="400" x2="370" y2="400" stroke="#FFFFFF" stroke-width="10"/>
+  <text x="300" y="500" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="46" letter-spacing="14" fill="#8A8A8A">MONK</text>
 </svg>
 `;
 }
