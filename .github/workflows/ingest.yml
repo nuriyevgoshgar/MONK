@@ -15,7 +15,7 @@ on:
         default: "200"
       language:
         description: "Language filter, LibriVox spelling (e.g. English, Turkish). Blank = all"
-        default: ""
+        default: "Turkish"
 
 jobs:
   ingest:
