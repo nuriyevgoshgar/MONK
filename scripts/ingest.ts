@@ -18,6 +18,11 @@
 import path from "node:path";
 import { db } from "../src/lib/db.ts";
 import { PoliteClient } from "../src/lib/ingest/http.ts";
+import {
+  isLanguageAllowed,
+  languageSkipReason,
+  parseLanguageList,
+} from "../src/lib/ingest/language.ts";
 import { classifyLicense } from "../src/lib/ingest/license.ts";
 import { slugify, upsertBook } from "../src/lib/ingest/persist.ts";
 import { IngestReport } from "../src/lib/ingest/report.ts";
@@ -43,6 +48,10 @@ function readArgs(argv: string[]) {
   return {
     source: str("--source", process.env.INGEST_SOURCE ?? "html")!,
     language: str("--language"),
+    // Comma-separated allow-list applied to every source. Blank keeps all.
+    languages: parseLanguageList(
+      str("--languages", process.env.INGEST_LANGUAGES),
+    ),
     limit: num("--limit", 5),
     pages: num("--pages", 2),
     write: argv.includes("--write"),
@@ -125,6 +134,13 @@ async function main() {
 
   const handle: BookHandler = async (book) => {
     describe(book);
+
+    if (!isLanguageAllowed(book.language, args.languages)) {
+      const reason = languageSkipReason(book.language, args.languages);
+      console.log(`    -> SKIPPED: ${reason}`);
+      await report.record("skipped", book.sourceUrl, { title: book.title, reason });
+      return;
+    }
 
     const verdict = classifyLicense(book.licenseText);
 

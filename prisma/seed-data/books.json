@@ -9,7 +9,7 @@
       "coverUrl": "/covers/frankenstein.svg",
       "description": "A student of natural philosophy builds a living creature, abandons it, and spends the rest of his life pursued by what he made. Told as a chain of letters and confessions across Europe and the Arctic ice.",
       "category": "Classics",
-      "language": "en",
+      "language": "English",
       "sourceUrl": "https://www.gutenberg.org/ebooks/84",
       "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
       "chapters": [
@@ -27,7 +27,7 @@
       "coverUrl": "/covers/pride-and-prejudice.svg",
       "description": "Five sisters, a small income, and a neighbourhood full of opinions. A comedy of manners about how quickly a first impression forms and how slowly it gives way.",
       "category": "Classics",
-      "language": "en",
+      "language": "English",
       "sourceUrl": "https://www.gutenberg.org/ebooks/1342",
       "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
       "chapters": [
@@ -45,7 +45,7 @@
       "coverUrl": "/covers/the-metamorphosis.svg",
       "description": "A travelling salesman wakes up changed into something his family cannot look at. A short, close, domestic account of a household rearranging itself around a locked door.",
       "category": "Classics",
-      "language": "en",
+      "language": "English",
       "sourceUrl": "https://www.gutenberg.org/ebooks/5200",
       "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
       "chapters": [
@@ -62,7 +62,7 @@
       "coverUrl": "/covers/alices-adventures-in-wonderland.svg",
       "description": "A girl follows a hurried rabbit underground and finds a place run entirely on its own logic, where the rules of size, time and conversation keep changing without warning.",
       "category": "Children",
-      "language": "en",
+      "language": "English",
       "sourceUrl": "https://www.gutenberg.org/ebooks/11",
       "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
       "chapters": [
@@ -80,7 +80,7 @@
       "coverUrl": "/covers/the-time-machine.svg",
       "description": "An inventor tells a room of sceptical dinner guests what he found eight hundred thousand years ahead: a gentle people in a garden, and the machinery humming underneath them.",
       "category": "Science Fiction",
-      "language": "en",
+      "language": "English",
       "sourceUrl": "https://www.gutenberg.org/ebooks/35",
       "license": "Public domain (Project Gutenberg). Placeholder narration generated locally for development.",
       "chapters": [

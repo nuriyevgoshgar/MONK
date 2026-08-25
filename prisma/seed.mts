@@ -152,6 +152,25 @@ async function seedBook(book: SeedBook) {
   return { totalDuration, removed: removed.count };
 }
 
+/**
+ * Removes books the catalogue no longer lists.
+ *
+ * Seeding is upsert-based, so dropping a title from catalog.json would
+ * otherwise leave it in the database for ever — the deployed app would keep
+ * serving a book the catalogue had already disowned. Chapters, progress,
+ * bookmarks and shelf entries all cascade, so no orphans are left behind.
+ *
+ * Matching is by sourceUrl, which both the hand-written books and the ingested
+ * ones carry, and which is unique per row.
+ */
+async function pruneMissingBooks(keep: string[]): Promise<number> {
+  const { count } = await db.book.deleteMany({
+    where: { sourceUrl: { notIn: keep } },
+  });
+
+  return count;
+}
+
 function warnAboutMissingAudio(books: SeedBook[]) {
   const missing = books.filter(
     (book) => !existsSync(path.join(ROOT, "public", "samples", book.slug)),
@@ -187,6 +206,18 @@ async function main() {
 
     for (const book of catalog) {
       await seedCatalogBook(book);
+    }
+
+    // Guarded by the check above on purpose: a missing or unreadable
+    // catalog.json reads as an empty catalogue, and pruning against that would
+    // delete every ingested book rather than none.
+    const pruned = await pruneMissingBooks([
+      ...books.map((book) => book.sourceUrl),
+      ...catalog.map((book) => book.sourceUrl),
+    ]);
+
+    if (pruned > 0) {
+      console.log(`  ${pruned} book(s) no longer in the catalogue removed.`);
     }
   }
 
