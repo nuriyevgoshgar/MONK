@@ -14,8 +14,11 @@ on:
         description: "How many books at most (large numbers make a large JSON file)"
         default: "200"
       language:
-        description: "librivox only — language filter (e.g. English, Turkish). Blank = all"
-        default: "Turkish"
+        description: "librivox only — asks the feed for one language. Blank = all"
+        default: ""
+      languages:
+        description: "Any source — keep only these languages, comma-separated. Blank = keep all"
+        default: "English,Turkish"
       base_url:
         description: "html only — catalogue site"
         default: "https://seslikitab.org"
@@ -43,6 +46,8 @@ jobs:
       DATABASE_URL: "postgresql://monk:monk@localhost:5432/monk"
       INGEST_DELAY_MS: "1000"
       INGEST_USER_AGENT: "MONK/0.1 (+https://github.com/${{ github.repository }})"
+      # Applies to every source, unlike the librivox-only `language` input.
+      INGEST_LANGUAGES: ${{ inputs.languages }}
       # Only read by the html source; librivox ignores them.
       INGEST_BASE_URL: ${{ inputs.base_url }}
       INGEST_CATALOG_PATH: ${{ inputs.catalog_path }}
