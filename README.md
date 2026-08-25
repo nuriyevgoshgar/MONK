@@ -259,10 +259,10 @@ book, so resuming means loading a single row.
 
 ### Deploying
 
-`npm run build` runs `prisma migrate deploy` before building, so a host only
-needs `DATABASE_URL` set — the schema is applied on deploy. Seed the catalogue
-once afterwards with `npm run db:seed`, or let the ingestion workflow populate
-`prisma/seed-data/catalog.json` and seed from that.
+`npm run build` applies migrations and seeds before building, so a host needs
+nothing but `DATABASE_URL`: push, and the deployed app comes up with the schema
+and the catalogue already in place. Seeding is upsert-based, so repeating it on
+every deploy changes nothing and costs a few seconds.
 
 The project started on SQLite and moved to Postgres because a serverless host
 has no writable filesystem: progress, bookmarks and shelves are all writes, and
