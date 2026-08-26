@@ -1,10 +1,53 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  canonicalLanguage,
   isLanguageAllowed,
   languageSkipReason,
   parseLanguageList,
 } from "./language.ts";
+
+test("maps an ISO code to the name the feeds use", () => {
+  assert.equal(canonicalLanguage("tr"), "turkish");
+  assert.equal(canonicalLanguage("en"), "english");
+  assert.equal(canonicalLanguage("de"), "german");
+});
+
+test("strips a regional suffix before mapping", () => {
+  assert.equal(canonicalLanguage("en-US"), "english");
+  assert.equal(canonicalLanguage("pt_BR"), "portuguese");
+  assert.equal(canonicalLanguage("zh-Hans"), "chinese");
+});
+
+test("leaves an unrecognised language alone rather than dropping it", () => {
+  assert.equal(canonicalLanguage("  Klingon "), "klingon");
+  assert.equal(canonicalLanguage("Multilingual"), "multilingual");
+  assert.equal(canonicalLanguage("Unknown"), "unknown");
+});
+
+test("a code and its name are the same language", () => {
+  // The bug this exists to prevent: a schema.org page says inLanguage "tr"
+  // while the allow-list says "Turkish", and the book is rejected for the
+  // wrong reason.
+  const allowed = parseLanguageList("English,Turkish");
+
+  assert.equal(isLanguageAllowed("tr", allowed), true);
+  assert.equal(isLanguageAllowed("en-GB", allowed), true);
+  assert.equal(isLanguageAllowed("Turkish", allowed), true);
+});
+
+test("an allow-list written in codes accepts the names too", () => {
+  const allowed = parseLanguageList("en, tr");
+
+  assert.equal(isLanguageAllowed("English", allowed), true);
+  assert.equal(isLanguageAllowed("Turkish", allowed), true);
+  assert.equal(isLanguageAllowed("German", allowed), false);
+});
+
+test("an unstated language is not quietly let through", () => {
+  const allowed = parseLanguageList("English,Turkish");
+  assert.equal(isLanguageAllowed("Unknown", allowed), false);
+});
 
 test("splits, trims and lower-cases the list", () => {
   assert.deepEqual(parseLanguageList("  English , turkish "), [

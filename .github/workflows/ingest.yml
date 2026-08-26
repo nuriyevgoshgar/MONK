@@ -5,8 +5,11 @@ name: Ingest catalogue
 on:
   workflow_dispatch:
     inputs:
+      book_url:
+        description: "One book page, by link. Set this and the other options are ignored"
+        default: ""
       source:
-        description: "Where to ingest from"
+        description: "Where to ingest from (ignored when book_url is set)"
         type: choice
         options: ["librivox", "html"]
         default: "librivox"
@@ -46,6 +49,9 @@ jobs:
       DATABASE_URL: "postgresql://monk:monk@localhost:5432/monk"
       INGEST_DELAY_MS: "1000"
       INGEST_USER_AGENT: "MONK/0.1 (+https://github.com/${{ github.repository }})"
+      # Set to ingest exactly one named book page instead of walking a
+      # catalogue. Blank is falsy, so leaving it empty keeps the normal path.
+      INGEST_BOOK_PAGE_URL: ${{ inputs.book_url }}
       # Applies to every source, unlike the librivox-only `language` input.
       INGEST_LANGUAGES: ${{ inputs.languages }}
       # Only read by the html source; librivox ignores them.

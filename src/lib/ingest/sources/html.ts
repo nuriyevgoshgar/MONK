@@ -4,9 +4,9 @@
 // markup — see src/lib/ingest/extract.ts.
 
 import { findBookLinks, findNextPageLink } from "../discover.ts";
-import { extractBook } from "../extract.ts";
 import { isAllowed } from "../robots.ts";
 import type { BookHandler, SourceContext } from "./context.ts";
+import { ingestBookPage } from "./page.ts";
 
 export type HtmlSourceOptions = {
   baseUrl: string;
@@ -74,49 +74,29 @@ export async function crawlHtml(
   ctx.log(`\nFetching ${bookUrls.length} book page(s)…`);
 
   for (const url of bookUrls) {
-    if (!isAllowed(ctx.robots, url)) {
-      await ctx.onSkip(url, "disallowed by robots.txt");
-      continue;
-    }
+    await ingestBookPage(ctx, url, handle);
+  }
+}
 
-    let response: Awaited<ReturnType<typeof ctx.client.fetchText>>;
+/**
+ * Single-URL mode: one book page, named directly, with no catalogue walk.
+ *
+ * robots.txt still applies — being handed a link is not permission to fetch it,
+ * and the same licence and language gates run downstream in the CLI.
+ */
+export async function crawlOne(
+  ctx: SourceContext,
+  url: string,
+  handle: BookHandler,
+): Promise<void> {
+  ctx.log(`\nReading one book page…\n  ${url}`);
 
-    try {
-      response = await ctx.client.fetchText(url);
-    } catch (error) {
-      await ctx.onBroken(url, error instanceof Error ? error.message : "fetch failed");
-      continue;
-    }
+  const added = await ingestBookPage(ctx, url, handle);
 
-    if (response.status !== 200) {
-      await ctx.onBroken(url, `returned ${response.status}`);
-      continue;
-    }
-
-    const parsed = extractBook(response.body, response.url);
-
-    if (!parsed.title || parsed.chapters.length === 0) {
-      await ctx.onSkip(
-        url,
-        !parsed.title ? "no title found" : "no audio chapters found",
-        parsed.title,
-      );
-      continue;
-    }
-
-    await handle({
-      title: parsed.title,
-      author: parsed.author ?? "Unknown",
-      narrator: parsed.narrator ?? "Unknown",
-      coverUrl: parsed.coverUrl ?? "",
-      description: parsed.description ?? "",
-      category: parsed.category ?? "Uncategorised",
-      language: parsed.language ?? "tr",
-      totalDuration:
-        parsed.totalDuration ?? parsed.chapters.reduce((sum, c) => sum + c.duration, 0),
-      sourceUrl: response.url,
-      licenseText: parsed.licenseText,
-      chapters: parsed.chapters,
-    });
+  if (!added) {
+    ctx.log(
+      "\nNothing ingested from that page. The report above says why — usually " +
+        "no audio was found on it, or its licence does not allow it.",
+    );
   }
 }
