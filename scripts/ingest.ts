@@ -4,6 +4,7 @@
 //   npm run ingest -- --source librivox --write       # public domain audiobooks
 //   npm run ingest -- --source librivox --language Turkish --limit 5000 --write
 //   npm run ingest -- --source html --write           # a site with no API
+//   npm run ingest -- --url https://…/a-book --write  # one book, by link
 //
 // Rules the code enforces rather than trusting the operator to remember:
 //
@@ -28,7 +29,7 @@ import { slugify, upsertBook } from "../src/lib/ingest/persist.ts";
 import { IngestReport } from "../src/lib/ingest/report.ts";
 import { fetchRobots } from "../src/lib/ingest/robots.ts";
 import type { BookHandler, SourceContext } from "../src/lib/ingest/sources/context.ts";
-import { crawlHtml } from "../src/lib/ingest/sources/html.ts";
+import { crawlHtml, crawlOne } from "../src/lib/ingest/sources/html.ts";
 import { crawlLibrivox, librivoxBase } from "../src/lib/ingest/sources/librivox.ts";
 import type { SourceBook } from "../src/lib/ingest/sources/types.ts";
 
@@ -47,6 +48,9 @@ function readArgs(argv: string[]) {
 
   return {
     source: str("--source", process.env.INGEST_SOURCE ?? "html")!,
+    // A single book page, named directly. Takes precedence over --source:
+    // there is no catalogue to walk when the book is already identified.
+    url: str("--url", process.env.INGEST_BOOK_PAGE_URL),
     language: str("--language"),
     // Comma-separated allow-list applied to every source. Blank keeps all.
     languages: parseLanguageList(
@@ -100,9 +104,15 @@ async function main() {
   const userAgent =
     process.env.INGEST_USER_AGENT ?? "MONK/0.1 (+https://github.com/nuriyevgoshgar/monk)";
   const isLibrivox = args.source === "librivox";
-  const originUrl = isLibrivox ? librivoxBase() : htmlOptions().baseUrl;
+  // htmlOptions() throws without INGEST_BASE_URL, so it must not be reached
+  // in single-URL mode, where the origin comes from the link itself.
+  const originUrl = args.url
+    ? new URL(args.url).origin
+    : isLibrivox
+      ? librivoxBase()
+      : htmlOptions().baseUrl;
 
-  console.log(`Source:     ${args.source} (${originUrl})`);
+  console.log(`Source:     ${args.url ? "single URL" : args.source} (${originUrl})`);
   console.log(`User-Agent: ${userAgent}`);
   console.log(`Mode:       ${args.write ? "WRITE to database" : "dry run (pass --write to save)"}\n`);
 
@@ -167,7 +177,9 @@ async function main() {
     await report.record("ingested", book.sourceUrl, { title: book.title });
   };
 
-  if (isLibrivox) {
+  if (args.url) {
+    await crawlOne(ctx, args.url, handle);
+  } else if (isLibrivox) {
     await crawlLibrivox(ctx, { language: args.language }, handle);
   } else {
     await crawlHtml(ctx, { ...htmlOptions(), maxPages: args.pages }, handle);

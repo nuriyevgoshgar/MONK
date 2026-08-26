@@ -7,14 +7,49 @@
 // no such parameter at all — still cannot slip other languages into the
 // catalogue.
 
-/** Normalises "  English , turkish " to ["english", "turkish"]. */
+// Sources spell the same language two different ways: a schema.org page says
+// inLanguage "tr" or "en-US", while the LibriVox feed says "Turkish". Comparing
+// the raw strings would reject a genuinely Turkish book for looking like "tr",
+// so both sides are canonicalised to one name first.
+const CODE_TO_NAME: Record<string, string> = {
+  ar: "arabic",
+  az: "azerbaijani",
+  de: "german",
+  en: "english",
+  es: "spanish",
+  fa: "persian",
+  fr: "french",
+  it: "italian",
+  ja: "japanese",
+  la: "latin",
+  pt: "portuguese",
+  ru: "russian",
+  tr: "turkish",
+  zh: "chinese",
+};
+
+/**
+ * "  EN-us " and "English" both become "english"; an unrecognised value is
+ * lower-cased and otherwise left alone rather than dropped, so a language this
+ * table has never heard of still compares consistently against itself.
+ */
+export function canonicalLanguage(value: string): string {
+  const trimmed = value.trim().toLowerCase();
+  // Regional variants: en-US, pt-BR, zh-Hans.
+  const base = trimmed.split(/[-_]/)[0];
+
+  return CODE_TO_NAME[base] ?? trimmed;
+}
+
+/** Normalises "  English , tr " to ["english", "turkish"]. */
 export function parseLanguageList(raw: string | null | undefined): string[] {
   if (!raw) return [];
 
   return raw
     .split(",")
-    .map((entry) => entry.trim().toLowerCase())
-    .filter((entry) => entry !== "");
+    .map((entry) => entry.trim())
+    .filter((entry) => entry !== "")
+    .map(canonicalLanguage);
 }
 
 /**
@@ -27,7 +62,7 @@ export function isLanguageAllowed(
 ): boolean {
   if (allowed.length === 0) return true;
 
-  return allowed.includes(language.trim().toLowerCase());
+  return allowed.includes(canonicalLanguage(language));
 }
 
 /** The skip reason recorded in the run report, so a run explains itself. */
