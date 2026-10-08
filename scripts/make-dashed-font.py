@@ -10,6 +10,7 @@ from skimage.morphology import skeletonize
 
 SRC, DST = sys.argv[1], sys.argv[2]
 DASH, GAP = float(sys.argv[3]), float(sys.argv[4])
+INSET = float(sys.argv[5])
 S = 0.5  # px per unit
 PAD = 20
 
@@ -116,40 +117,38 @@ def process(name):
     nc = ndi.convolve(sk.astype(np.uint8), np.ones((3,3), np.uint8), mode='constant') - 1
     junc = sk & (nc >= 3)
     jd = ndi.distance_transform_edt(~junc) if junc.any() else np.full(sk.shape, 1e9)
-    cut = pathops.Path(); cp = cut.getPen(); ncut = 0
+    RAD = INSET  # dot radius in units
+    PITCH = DASH + GAP
+    dots = []
+    def near(c):
+        for d in dots:
+            if (d[0]-c[0])**2 + (d[1]-c[1])**2 < (PITCH*0.8)**2: return True
+        return False
     for pxs, t0, t1 in edges:
         pts = np.array([to_u(p[0], p[1]) for p in pxs])
+        if len(pts) >= 7:
+            k = np.ones(5)/5
+            sm = np.stack([np.convolve(np.pad(pts[:, c], 2, mode='edge'), k, mode='valid') for c in (0, 1)], axis=1)
+            sm[0] = pts[0]; sm[-1] = pts[-1]; pts = sm
         seg = np.hypot(*np.diff(pts, axis=0).T)
         cum = np.concatenate([[0], np.cumsum(seg)])
         L = cum[-1]
-        if t0 != t1 or (t0 and t1):
-            mdt = max(dt[p] for p in pxs)/S
-            if (t0 or t1) and L < 2.2*mdt*(1 if (t0 and t1) else 1) and not (t0 and t1 and L > 4*mdt): continue
-        r0 = dt[pxs[0]]/S if t0 else 0
-        r1 = dt[pxs[-1]]/S if t1 else 0
-        tot = L + r0 + r1
-        n = int(round((tot + GAP) / (DASH + GAP)))
-        if n < 2: continue
-        d = (tot - (n-1)*GAP) / n
-        for k in range(1, n):
-            s = k*(d+GAP) - GAP/2 - r0
-            if s <= 2 or s >= L-2: continue
-            if jd[pxs[min(int(np.searchsorted(cum, s)), len(pxs)-1)]] < dt[pxs[min(int(np.searchsorted(cum, s)), len(pxs)-1)]]*1.7+3: continue
-            i = int(np.searchsorted(cum, s))
-            i = min(max(i, 1), len(pts)-1)
-            f = (s-cum[i-1])/max(cum[i]-cum[i-1], 1e-9)
-            c = pts[i-1]*(1-f)+pts[i]*f
-            a_i = max(0, i-6); b_i = min(len(pts)-1, i+5)
-            tv = pts[b_i]-pts[a_i]; nt = np.hypot(*tv)
-            if nt == 0: continue
-            tv = tv/nt
-            rad = dt[pxs[min(i, len(pxs)-1)]]/S
-            r = rect(c, tv, rad*1.05+8, GAP/2)
-            cp.moveTo(r[0]); [cp.lineTo(q) for q in r[1:]]; cp.closePath(); ncut += 1
-    if ncut:
-        cut.simplify(fix_winding=True)
-        path = pathops.op(path, cut, pathops.PathOp.DIFFERENCE)
-    return path
+        if (t0 or t1) and L < 1.6*RAD*2 and not (t0 and t1): continue
+        n = max(1, int(round(L / PITCH)))
+        for k2 in range(n + 1):
+            sdist = L * k2 / n
+            i2 = min(max(int(np.searchsorted(cum, sdist)), 1), len(pts)-1)
+            f = (sdist-cum[i2-1])/max(cum[i2]-cum[i2-1], 1e-9)
+            c = tuple(pts[i2-1]*(1-f)+pts[i2]*f)
+            if not near(c): dots.append(c)
+        if len(pts) < 2: continue
+    out = pathops.Path(); op_ = out.getPen()
+    for c in dots:
+        pts16 = [(c[0]+RAD*math.cos(a*math.pi/8), c[1]+RAD*math.sin(a*math.pi/8)) for a in range(16)]
+        op_.moveTo(pts16[0]); [op_.lineTo(q) for q in pts16[1:]]; op_.closePath()
+    if not dots: return path
+    out.simplify(fix_winding=True)
+    return out
 
 for name in font.getGlyphOrder():
     print(name, flush=True)
@@ -184,14 +183,14 @@ for name in font.getGlyphOrder():
     g = glyf[name]; adv, _ = font['hmtx'][name]
     font['hmtx'][name] = (adv, getattr(g, 'xMin', 0) if g.numberOfContours else 0)
 
-fam = 'Farsan Dashed'
+fam = 'Farsan Dotted'
 for n in font['name'].names:
     if n.nameID == 1: n.string = fam
-    elif n.nameID == 3: n.string = '1.001;FarsanDashed-Regular'
+    elif n.nameID == 3: n.string = '1.001;FarsanDotted-Regular'
     elif n.nameID == 4: n.string = fam + ' Regular'
-    elif n.nameID == 6: n.string = 'FarsanDashed-Regular'
-    elif n.nameID == 5: n.string = 'Version 1.001; modified (dashed)'
-font['name'].setName('Dashed derivative of Farsan by Pooja Saxena. Licensed under the SIL Open Font License 1.1.', 10, 3, 1, 0x409)
+    elif n.nameID == 6: n.string = 'FarsanDotted-Regular'
+    elif n.nameID == 5: n.string = 'Version 1.001; modified (dotted)'
+font['name'].setName('Dotted derivative of Farsan by Pooja Saxena. Licensed under the SIL Open Font License 1.1.', 10, 3, 1, 0x409)
 font['name'].setName('https://openfontlicense.org', 14, 3, 1, 0x409)
 font['name'].setName('SIL Open Font License, Version 1.1', 13, 3, 1, 0x409)
 font['post'].formatType = 2.0 if False else font['post'].formatType
